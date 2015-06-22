@@ -154,6 +154,9 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 			data = add_byte(data, &mempos, 0x09);
 			data = add_byte(data, &mempos, (u8)(label.mempos & 0xFF));
 			data = add_byte(data, &mempos, 0x1D);
+		}else {
+			printf("ERROR line %d: Unknwon opcode '%s'\n", line, tok);
+			exit(-1);
 		}
 
 		line++;

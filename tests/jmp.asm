@@ -1,5 +1,5 @@
 :start
 INCX
 LDHA 0x02
-LDHL 0x00
+LDHA 0x00
 JMP
