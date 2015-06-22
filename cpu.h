@@ -32,6 +32,7 @@
 #define LDAC	0x1A	// Load acc with value of next byte
 #define LDXC	0x1B	// Load x with value of next byte
 #define LDYC	0x1C	// Load y with value of next byte
+#define JMP		0x1D	// Set IP to address
 
 typedef uint8_t u8;
 typedef uint16_t u16;

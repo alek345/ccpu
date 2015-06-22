@@ -36,8 +36,8 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 			continue;
 		}
 
-		char* line = strdup(lines[i]);
-		char* tok = strtok(line, " ,");
+		char* linedup = strdup(lines[i]);
+		char* tok = strtok(linedup, " ,");
 		
 		if(strcmp(tok, "NOP") == 0){
 			data = add_byte(data, &mempos, 0x00);
@@ -110,7 +110,7 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 			tok = strtok(NULL, " ,");
 			int num = strtol(tok, NULL, 0);
 			if(num > 255 || num < 0) {
-				printf("ERROR line %d: Value out of bounds, needed 8-bit value\n", num);
+				printf("ERROR line %d: Value out of bounds, needed 8-bit value\n", line);
 				exit(-1);
 			}
 			data = add_byte(data, &mempos, (u8)num);
@@ -119,7 +119,7 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 			tok = strtok(NULL, " ,");
 			int num = strtol(tok, NULL, 0);
 			if(num > 255 || num < 0) {
-				printf("ERROR line %d: Value out of bounds, needed 8-bit value\n", num);
+				printf("ERROR line %d: Value out of bounds, needed 8-bit value\n", line);
 				exit(-1);
 			}
 			data = add_byte(data, &mempos, (u8)num);
@@ -128,10 +128,32 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 			tok = strtok(NULL, " ,");
 			int num = strtol(tok, NULL, 0);
 			if(num > 255 || num < 0) {
-				printf("ERROR line %d: Value out of bounds, needed 8-bit value\n", num);
+				printf("ERROR line %d: Value out of bounds, needed 8-bit value\n", line);
 				exit(-1);
 			}
 			data = add_byte(data, &mempos, (u8)num);
+		}else if(strcmp(tok, "JMP") == 0) {
+			data = add_byte(data, &mempos, 0x1D);
+		}else if(strcmp(tok, "JMPL") == 0) {
+			tok = strtok(NULL, " ,");
+			int j;
+			Label label;
+			label.name = NULL;
+			for(j = 0; j < labels->count; j++) {
+				if(strcmp(tok, labels->labels[j].name) == 0){
+					label = labels->labels[j];
+				}
+			}
+			if(label.name == NULL) {
+				printf("ERROR line %d: Unknown label!\n", line);
+				exit(-1);
+			}
+			
+			data = add_byte(data, &mempos, 0x08);
+			data = add_byte(data, &mempos, (u8)((label.mempos & 0xFF00) >> 8));
+			data = add_byte(data, &mempos, 0x09);
+			data = add_byte(data, &mempos, (u8)(label.mempos & 0xFF));
+			data = add_byte(data, &mempos, 0x1D);
 		}
 
 		line++;
@@ -226,6 +248,10 @@ LabelArray* find_labels(char** lines, int linecount, int memoffset)
 			mempos += 2;
 		}else if(strcmp(tok, "LDYC") == 0) {
 			mempos += 2;
+		}else if(strcmp(tok, "JMP") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "JMPL") == 0) {
+			mempos += 5;
 		}
 	}
 

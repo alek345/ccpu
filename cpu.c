@@ -104,5 +104,8 @@ void cpu_cycle(CPU* c)
 		case LDYC:
 			c->y = c->mem[c->ip++];
 			break;
+		case JMP:
+			c->ip = c->address;
+			break;
 	}
 }

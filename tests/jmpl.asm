@@ -1,0 +1,5 @@
+INCX
+INCX
+:loop
+INCX
+JMPL loop
