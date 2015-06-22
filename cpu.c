@@ -95,5 +95,14 @@ void cpu_cycle(CPU* c)
 		case STRY:
 			c->mem[c->address] = c->y;
 			break;
+		case LDAC:
+			c->acc = c->mem[c->ip++];
+			break;
+		case LDXC:
+			c->x = c->mem[c->ip++];
+			break;
+		case LDYC:
+			c->y = c->mem[c->ip++];
+			break;
 	}
 }

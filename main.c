@@ -47,7 +47,23 @@ int main(int argc, char** argv)
 			printf("ACC: 0x%02X, X: 0x%02X, Y: 0x%02X\n", c->acc, c->x, c->y);
 			printf("HLT: %s\n", c->hlt ? "true" : "false");
 			
-			getchar();
+get_input:
+			printf(": ");
+			char in = getchar();
+			switch (in) {
+				case 'x':
+				case 'X':
+				case 'q':
+				case 'Q':
+					return 0;
+					break;
+				case 'd':
+				case 'D':
+					f = fopen("memdump.bin", "wb");
+					fwrite(c->mem, sizeof(u8), 0x10000, f);
+					fclose(f);
+					goto get_input;
+			}
 		}
 		if(c->hlt) break;
 	

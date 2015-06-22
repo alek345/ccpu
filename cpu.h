@@ -29,6 +29,9 @@
 #define STRA	0x17	// Store acc at address in memory
 #define STRX	0x18	// Store x at address in memory
 #define STRY	0x19	// Store y at address in memory
+#define LDAC	0x1A	// Load acc with value of next byte
+#define LDXC	0x1B	// Load x with value of next byte
+#define LDYC	0x1C	// Load y with value of next byte
 
 typedef uint8_t u8;
 typedef uint16_t u16;

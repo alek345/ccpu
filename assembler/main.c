@@ -57,8 +57,22 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 			data = add_byte(data, &mempos, 0x07);
 		}else if(strcmp(tok, "LDHA") == 0) {
 			data = add_byte(data, &mempos, 0x08);
+			tok = strtok(NULL, " ,");
+			int num = strtol(tok, NULL, 0);
+			if(num > 255 || num < 0) {
+				printf("ERROR line %d: Value out of bounds, needed 8-bit unsigned value\n", line);
+				exit(-1);
+			}
+			data = add_byte(data, &mempos, (u8)num);
 		}else if(strcmp(tok, "LDLA") == 0) {
 			data = add_byte(data, &mempos, 0x09);
+			tok = strtok(NULL, " ,");
+			int num = strtol(tok, NULL, 0);
+			if(num > 255 || num < 0) {
+				printf("ERROR line %d: Value out of bounds, needed 8-bit unsigned value\n", line);
+				exit(-1);
+			}
+			data = add_byte(data, &mempos, (u8)num);
 		}else if(strcmp(tok, "LDXM") == 0) {
 			data = add_byte(data, &mempos, 0x0A);
 		}else if(strcmp(tok, "LDYM") == 0) {
@@ -91,6 +105,33 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 			data = add_byte(data, &mempos, 0x18);
 		}else if(strcmp(tok, "STRY") == 0) {
 			data = add_byte(data, &mempos, 0x19);
+		}else if(strcmp(tok, "LDAC") == 0) {
+			data = add_byte(data, &mempos, 0x1A);
+			tok = strtok(NULL, " ,");
+			int num = strtol(tok, NULL, 0);
+			if(num > 255 || num < 0) {
+				printf("ERROR line %d: Value out of bounds, needed 8-bit value\n", num);
+				exit(-1);
+			}
+			data = add_byte(data, &mempos, (u8)num);
+		}else if(strcmp(tok, "LDXC") == 0) {
+			data = add_byte(data, &mempos, 0x1B);
+			tok = strtok(NULL, " ,");
+			int num = strtol(tok, NULL, 0);
+			if(num > 255 || num < 0) {
+				printf("ERROR line %d: Value out of bounds, needed 8-bit value\n", num);
+				exit(-1);
+			}
+			data = add_byte(data, &mempos, (u8)num);
+		}else if(strcmp(tok, "LDYC") == 0) {
+			data = add_byte(data, &mempos, 0x1C);
+			tok = strtok(NULL, " ,");
+			int num = strtol(tok, NULL, 0);
+			if(num > 255 || num < 0) {
+				printf("ERROR line %d: Value out of bounds, needed 8-bit value\n", num);
+				exit(-1);
+			}
+			data = add_byte(data, &mempos, (u8)num);
 		}
 
 		line++;
@@ -110,8 +151,8 @@ LabelArray* find_labels(char** lines, int linecount, int memoffset)
 	int mempos = memoffset;
 	for(i = 0; i < linecount; i++) {
 		if(lines[i][0] == ':') {
-			if(*lines[i]+1 == 0 || *lines[i]+1 == '\n') {
-				printf("ERROR: No label following ':'. Line: %d", i+1);
+			if(lines[i][1] == 0 || lines[i][1] == '\n') {
+				printf("ERROR line %d: No label following ':'.\n", i+1);
 				exit(-1);
 			}
 			array->count++;
@@ -127,7 +168,11 @@ LabelArray* find_labels(char** lines, int linecount, int memoffset)
 		char* line = strdup(lines[i]);
 		char* tok = strtok(line, " ,");
 		
-		if(strcmp(tok, "LDAX") == 0) {
+		if(strcmp(tok, "NOP") == 0){
+			mempos++;
+		}else if(strcmp(tok, "HLT") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "LDAX") == 0) {
 			mempos++;
 		}else if(strcmp(tok, "LDAY") == 0) {
 			mempos++;
@@ -135,6 +180,52 @@ LabelArray* find_labels(char** lines, int linecount, int memoffset)
 			mempos++;
 		}else if(strcmp(tok, "LDXA") == 0) {
 			mempos++;
+		}else if(strcmp(tok, "LDYX") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "LDYA") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "LDHA") == 0) {
+			mempos += 2;
+		}else if(strcmp(tok, "LDLA") == 0) {
+			mempos += 2;
+		}else if(strcmp(tok, "LDXM") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "LDYM") == 0) {
+			mempos++;			
+		}else if(strcmp(tok, "LDAM") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "INCA") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "INCX") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "INCY") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "DECA") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "DECX") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "DECY") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "ADAX") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "ADAY") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "SUAX") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "SUAY") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "STRA") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "STRX") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "STRY") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "LDAC") == 0) {
+			mempos += 2;
+		}else if(strcmp(tok, "LDXC") == 0) {
+			mempos += 2;
+		}else if(strcmp(tok, "LDYC") == 0) {
+			mempos += 2;
 		}
 	}
 
