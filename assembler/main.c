@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "../cpu.h"
 
@@ -37,8 +38,10 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 
 		char* line = strdup(lines[i]);
 		char* tok = strtok(line, " ,");
-
-		if(strcmp(tok, "HLT") == 0) {
+		
+		if(strcmp(tok, "NOP") == 0){
+			data = add_byte(data, &mempos, 0x00);
+		}else if(strcmp(tok, "HLT") == 0) {
 			data = add_byte(data, &mempos, 0x01);
 		}else if(strcmp(tok, "LDAX") == 0) {
 			data = add_byte(data, &mempos, 0x02);
@@ -97,14 +100,14 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 	return data;
 }
 
-LabelArray* find_labels(char** lines, int linecount)
+LabelArray* find_labels(char** lines, int linecount, int memoffset)
 {
 	LabelArray* array = (LabelArray*)malloc(sizeof(LabelArray));
 	array->labels = NULL;
 	array->count = 0;
 	
 	int i;
-	int mempos = 0;
+	int mempos = memoffset;
 	for(i = 0; i < linecount; i++) {
 		if(lines[i][0] == ':') {
 			if(*lines[i]+1 == 0 || *lines[i]+1 == '\n') {
@@ -150,10 +153,23 @@ void remove_newlines(char** lines, int linecount)
 
 int main(int argc, char** argv)
 {
-	if(argc != 3) {
-		printf("Usage: ccpu-asm <input file> <output file>\n");
+	if(argc < 4) {
+		printf("Usage: ccpu-asm <input file> <output file> <memory offset> [options]\n\nOptions:\n\t-m - Output a memory map\n");
 		return -1;
 	}
+
+	int mapflag = 0;
+
+	if(argc > 4) {
+		int i;
+		for(i = 4; i < argc; i++) {
+			if(strcmp(argv[i], "-m") == 0) {
+				mapflag = 1;
+			}
+		}
+	}
+
+	int offset = strtol(argv[3], NULL, 0);
 
 	FILE* f = fopen(argv[1], "r");
 	if(f == NULL) {
@@ -180,7 +196,7 @@ int main(int argc, char** argv)
 	remove_newlines(lines, linecount);
 
 	// Find and calculate offset for every label
-	LabelArray *labels = find_labels(lines, linecount);
+	LabelArray *labels = find_labels(lines, linecount, offset);
 /*	int i;
 	for(i = 0; i < labels->count; i++) {
 		printf("Name: %s, Offset: %d\n", labels->labels[i].name, labels->labels[i].mempos);
@@ -198,6 +214,22 @@ int main(int argc, char** argv)
 	FILE* of = fopen(argv[2], "wb");
 	fwrite(data, sizeof(u8), data_len, of);
 	fclose(of);
+
+	// If 'mapflag' output a .map file containing addreses for all labels
+	if(mapflag) {
+		char* filename = strdup(argv[2]);
+		strncat(filename, ".map", 4);
+		FILE* map = fopen(filename, "w");
+
+		fprintf(map, "OFFSET 0x%04X\n\n", offset);
+
+		int i;
+		for(i = 0; i < labels->count; i++) {
+			fprintf(map, "%s: 0x%04X\n", labels->labels[i].name, labels->labels[i].mempos);
+		}
+		
+		fclose(map);
+	}
 	
 	free(lines);
 	return 0;	
