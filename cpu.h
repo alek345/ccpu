@@ -33,9 +33,28 @@
 #define LDXC	0x1B	// Load x with value of next byte
 #define LDYC	0x1C	// Load y with value of next byte
 #define JMP		0x1D	// Set IP to address
+#define INCD	0x1E	// Increment address
+#define CMPXY	0x1F	// Compare x and y
+#define CMPAX	0x20	// Compare a and x
+#define CMPAY	0x21	// Compare a and y
+#define JE		0x22	// Jump on equal
+#define JNE		0x23	// Jimp when not equal
+#define JL		0x24	// Jump when first reg is lower then second reg
+#define JG		0x25	// Jump when first reg is higher then second reg
+#define ADDA 	0x26	// Add acc to address
+#define ADDX	0x27	// Add x to address
+#define ADDY	0x28	// Add y to address
 
 typedef uint8_t u8;
 typedef uint16_t u16;
+
+typedef enum{
+	NONE,
+	EQUAL,
+	NEQUAL,
+	GREATER,
+	LESS
+} CMP;
 
 typedef struct{
 	u8* mem;
@@ -45,6 +64,7 @@ typedef struct{
 	u8 y;
 	u16 ip;
 	u8 hlt;
+	CMP cmp;
 } CPU;
 
 // Intialize and return a CPU struct ready for use

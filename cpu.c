@@ -1,5 +1,23 @@
 #include "cpu.h"
 
+CMP compare(u8 first, u8 second)
+{
+	CMP cmp;
+	
+	if(first == second){
+		cmp = EQUAL;
+	}else{
+		cmp = NEQUAL;
+	}
+	if(first > second) {
+		cmp = GREATER;
+	}else if(first < second){
+		cmp = LESS;
+	}
+
+	return cmp;
+}
+
 CPU* cpu_init(u16 start_addr)
 {
 	CPU* c = (CPU*) malloc(sizeof(CPU));
@@ -10,7 +28,8 @@ CPU* cpu_init(u16 start_addr)
 	c->y = 0;
 	c->ip = start_addr;	
 	c->hlt = 0;
-	
+	c->cmp = NONE;	
+
 	return c;
 }
 
@@ -42,9 +61,11 @@ void cpu_cycle(CPU* c)
 			c->y = c->acc;
 			break;
 		case LDHA:
-			c->address |= c->mem[c->ip++] << 8;
+			c->address &= ~0xFF00;
+			c->address |= (c->mem[c->ip++] << 8);
 			break;
 		case LDLA:
+			c->address &= ~0xFF;
 			c->address |= c->mem[c->ip++];
 			break;
 		case LDXM:
@@ -106,6 +127,39 @@ void cpu_cycle(CPU* c)
 			break;
 		case JMP:
 			c->ip = c->address;
+			break;
+		case INCD:
+			c->address++;
+			break;
+		case CMPXY:
+			c->cmp = compare(c->x, c->y);
+			break;
+		case CMPAX:
+			c->cmp = compare(c->acc, c->x);
+			break;
+		case CMPAY:
+			c->cmp = compare(c->acc, c->y);
+			break;
+		case JE:
+			if(c->cmp == EQUAL) c->ip = c->address;
+			break;
+		case JNE:
+			if(c->cmp == NEQUAL) c->ip = c->address;
+			break;
+		case JL:
+			if(c->cmp == LESS) c->ip = c->address;
+			break;
+		case JG:
+			if(c->cmp == GREATER) c->ip = c->address;
+			break;
+		case ADDA:
+			c->address += c->acc;
+			break;
+		case ADDX:
+			c->address += c->x;
+			break;
+		case ADDY:
+			c->address += c->y;
 			break;
 	}
 }

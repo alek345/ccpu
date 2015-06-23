@@ -1,0 +1,29 @@
+LDAC 6				
+LDYC 0
+LDXC 0
+
+:start
+SETD program
+ADDY
+LDXM
+LDHA 0x50
+LDLA 0x00
+ADDY
+STRX
+INCY
+CMPAY
+SETD goto_program
+JE
+JMPL start
+
+:goto_program
+LDHA 0x50
+LDLA 0x00
+JMP
+HLT
+
+:program
+INCX
+LDHA 0x50
+LDLA 0x00
+JMP

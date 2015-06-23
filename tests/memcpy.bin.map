@@ -1,0 +1,5 @@
+OFFSET 0x0200
+
+start: 0x0206
+goto_program: 0x021E
+program: 0x0224

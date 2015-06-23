@@ -154,7 +154,49 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 			data = add_byte(data, &mempos, 0x09);
 			data = add_byte(data, &mempos, (u8)(label.mempos & 0xFF));
 			data = add_byte(data, &mempos, 0x1D);
-		}else {
+		}else if(strcmp(tok, "INCD") == 0) {
+			data = add_byte(data, &mempos, 0x1E);
+		}else if(strcmp(tok, "SETD") == 0) {
+			tok = strtok(NULL, " ,");
+			int j;
+			Label label;
+			label.name = NULL;
+			for(j = 0; j < labels->count; j++) {
+				if(strcmp(tok, labels->labels[j].name) == 0){
+					label = labels->labels[j];
+				}
+			}
+			if(label.name == NULL) {
+				printf("ERROR line %d: Unknown label!\n", line);
+				exit(-1);
+			}
+			
+			data = add_byte(data, &mempos, 0x08);
+			data = add_byte(data, &mempos, (u8)((label.mempos & 0xFF00) >> 8));
+			data = add_byte(data, &mempos, 0x09);
+			data = add_byte(data, &mempos, (u8)(label.mempos & 0xFF));
+		}else if(strcmp(tok, "CMPXY") == 0) {
+			data = add_byte(data, &mempos, 0x1F);
+		}else if(strcmp(tok, "CMPAX") == 0) {
+			data = add_byte(data, &mempos, 0x20);
+		}else if(strcmp(tok, "CMPAY") == 0) {
+			data = add_byte(data, &mempos, 0x21);
+		}else if(strcmp(tok, "JE") == 0) {
+			data = add_byte(data, &mempos, 0x22);
+		}else if(strcmp(tok, "JNE") == 0) {
+			data = add_byte(data, &mempos, 0x23);
+		}else if(strcmp(tok, "JL") == 0) {
+			data = add_byte(data, &mempos, 0x24);
+		}else if(strcmp(tok, "JG") == 0) {
+			data = add_byte(data, &mempos, 0x25);
+		}else if(strcmp(tok, "ADDA") == 0) {
+			data = add_byte(data, &mempos, 0x26);
+		}else if(strcmp(tok, "ADDX") == 0) {
+			data = add_byte(data, &mempos, 0x27);
+		}else if(strcmp(tok, "ADDY") == 0) {
+			data = add_byte(data, &mempos, 0x28);
+		}
+		else {
 			printf("ERROR line %d: Unknwon opcode '%s'\n", line, tok);
 			exit(-1);
 		}
@@ -182,7 +224,7 @@ LabelArray* find_labels(char** lines, int linecount, int memoffset)
 			}
 			array->count++;
 			array->labels = (Label*)realloc(array->labels, sizeof(Label)*array->count);
-			array->labels[array->count-1].mempos = mempos,
+			array->labels[array->count-1].mempos = mempos;
 			array->labels[array->count-1].name = strdup(lines[i]+1);
 
 			continue;
@@ -255,6 +297,30 @@ LabelArray* find_labels(char** lines, int linecount, int memoffset)
 			mempos++;
 		}else if(strcmp(tok, "JMPL") == 0) {
 			mempos += 5;
+		}else if(strcmp(tok, "INCD") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "CMPXY") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "CMPAX") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "CMPAY") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "JE") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "JNE") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "JL") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "JG") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "ADDA") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "ADDX") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "ADDY") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "SETD") == 0) {
+			mempos += 4;
 		}
 	}
 
