@@ -1,0 +1,25 @@
+JMPL start
+
+:var1
+NOP
+:var2
+NOP
+:result
+NOP
+
+:start
+SETD var1
+LDYC 0x20
+STRY
+SETD var2
+LDYC 0x77
+STRY
+
+SETD var1
+LDAM
+SETD var2
+LDXM
+ADAX
+SETD result
+STRA
+HLT
