@@ -1,10 +1,56 @@
 #include <stdio.h>
 #include <string.h>
+#include <SDL2/SDL.h>
 #include "cpu.h"
+#include "screen.h"
+
+CPU* c = NULL;
+int stepping = 0;
+int cpu_running = 1;
+
+int cpu_thread_func(void* args)
+{
+	FILE* f;	
+
+	while(1) {
+		if(stepping) {			
+			printf("IP: 0x%04X, ADDRESS: 0x%04X\n", c->ip, c->address);
+			printf("ACC: 0x%02X, X: 0x%02X, Y: 0x%02X\n", c->acc, c->x, c->y);
+			printf("HLT: %s\n", c->hlt ? "true" : "false");
+			
+get_input:
+			printf(": ");
+			char in = getchar();
+			switch (in) {
+				case 'x':
+				case 'X':
+				case 'q':
+				case 'Q':
+					cpu_running = 0;
+					return 0;
+					break;
+				case 'd':
+				case 'D':
+					f = fopen("memdump.bin", "wb");
+					fwrite(c->mem, sizeof(u8), 0x10000, f);
+					fclose(f);
+					goto get_input;
+			}
+		}
+		if(c->hlt) { 
+			cpu_running = 0;
+			return 0;
+		}		
+
+		cpu_cycle(c);
+	}
+
+
+	return 0;
+}
 
 int main(int argc, char** argv)
 {
-	int stepping = 0;
 	int i;
 
 	if(argc > 2) {
@@ -34,41 +80,39 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	CPU* c = cpu_init(0x200);
+	c = cpu_init(0x200);
+	Screen* s = screen_init();
 
 	for(i = 0; i < length; i++) {
 		c->mem[c->ip+i] = buffer[i];
 	}
-	
-	while(1) {
-		if(stepping) {
-			
-			printf("IP: 0x%04X, ADDRESS: 0x%04X\n", c->ip, c->address);
-			printf("ACC: 0x%02X, X: 0x%02X, Y: 0x%02X\n", c->acc, c->x, c->y);
-			printf("HLT: %s\n", c->hlt ? "true" : "false");
-			
-get_input:
-			printf(": ");
-			char in = getchar();
-			switch (in) {
-				case 'x':
-				case 'X':
-				case 'q':
-				case 'Q':
-					return 0;
-					break;
-				case 'd':
-				case 'D':
-					f = fopen("memdump.bin", "wb");
-					fwrite(c->mem, sizeof(u8), 0x10000, f);
-					fclose(f);
-					goto get_input;
-			}
-		}
-		if(c->hlt) break;
-	
-		cpu_cycle(c);
-	}
 
+	SDL_CreateThread(cpu_thread_func, "ccpu_thread", NULL);
+	
+	Uint32 now = SDL_GetTicks();
+	Uint32 lastTime = now;
+	Uint32 fpsCounterTime = now;
+	Uint32 interval = 17;
+
+	int frames = 0;
+
+	while(!screen_closerequested(s)) {
+		now = SDL_GetTicks();
+		
+		if(lastTime - now > interval) {
+			screen_update(s, c);
+			frames++;
+			lastTime = now;	
+		}
+
+		if(fpsCounterTime - now > 1000) {
+			frames = 0;
+			fpsCounterTime = now;
+		}
+
+		screen_pollevents(s);
+		if(!cpu_running) break;
+	}
+	
 	return 0;
 }

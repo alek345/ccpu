@@ -1,2 +1,2 @@
 #!/bin/sh
-gcc cpu.c main.c -o ccpu
+gcc cpu.c screen.c main.c -lSDL2 -o ccpu
