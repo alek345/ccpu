@@ -80,37 +80,64 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	c = cpu_init(0x200);
+	f = fopen("rom.bin", "rb");
+	if(f == NULL) {
+		printf("Could not open 'rom.bin'\n");
+		return -1;
+	}
+	fseek(f, 0, SEEK_END);
+	int rom_length = ftell(f);
+	if(rom_length > 0x100) {
+		printf("'rom.bin' is %04X bytes long, but can not be longer than 0x100 bytes\n");
+		return -1;
+	}
+	rewind(f);
+	u8* rom_buffer = (u8*)malloc(sizeof(u8)*rom_length);
+	read = fread(rom_buffer, sizeof(u8), rom_length, f);
+	if(read != rom_length) {
+		printf("Failed to read 'rom.bin'\n");
+		return -1;
+	}
+	fclose(f);
+
+	c = cpu_init(0x1000);
 	Screen* s = screen_init();
 
 	for(i = 0; i < length; i++) {
 		c->mem[c->ip+i] = buffer[i];
 	}
 
+	for(i = 0; i < rom_length; i++) {
+		c->mem[0x100+i] = rom_buffer[i];
+	}
+
+	c->ip = 0x100;
+
 	SDL_CreateThread(cpu_thread_func, "ccpu_thread", NULL);
 	
 	Uint32 now = SDL_GetTicks();
 	Uint32 lastTime = now;
 	Uint32 fpsCounterTime = now;
-	Uint32 interval = 17;
+	Uint32 interval = 16;
 
 	int frames = 0;
 
 	while(!screen_closerequested(s)) {
 		now = SDL_GetTicks();
 		
-		if(lastTime - now > interval) {
+		if(now - lastTime > interval) {
 			screen_update(s, c);
 			frames++;
 			lastTime = now;	
 		}
 
-		if(fpsCounterTime - now > 1000) {
+		if(now - fpsCounterTime > 1000) {
+			printf("fps %d\n", frames);
 			frames = 0;
 			fpsCounterTime = now;
 		}
 
-		screen_pollevents(s);
+		screen_pollevents(s, c);
 		if(!cpu_running) break;
 	}
 	

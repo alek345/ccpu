@@ -20,7 +20,7 @@ Screen* screen_init()
 		exit(-1);
 	}
 
-	s->renderer = SDL_CreateRenderer(s->window, -1, 0);
+	s->renderer = SDL_CreateRenderer(s->window, -1, SDL_RENDERER_ACCELERATED);
 	if(s->renderer == NULL) {
 		printf("Failed to create renderer!\n");
 		exit(-1);
@@ -84,6 +84,9 @@ void screen_update(Screen* s, CPU* c)
 	for(i = 0; i < 80*30; i++) {
 		u8 ch = c->mem[0x8000+(mem++)];
 		u8 col = c->mem[0x8000+(mem++)];
+		if(col == 0) {
+			continue;
+		}		
 
 		u8 ch_x = (ch % 16) * 8;
 		u8 ch_y = (ch / 16) * 12;
@@ -99,23 +102,28 @@ void screen_update(Screen* s, CPU* c)
 		sr.y = y * 12;
 		
 		u8 bg = (col & 0xF0) >> 4;
-		SDL_SetRenderDrawColor(s->renderer, colors[bg].r, colors[bg].g, colors[bg].b, 255);
-		SDL_RenderFillRect(s->renderer, &sr);
+		if(bg != 0) {
+			SDL_SetRenderDrawColor(s->renderer, colors[bg].r, colors[bg].g, colors[bg].b, 255);
+			SDL_RenderFillRect(s->renderer, &sr);
+		}
 		u8 fg = (col & 0xF);
-		SDL_SetTextureColorMod(s->font, colors[fg].r, colors[fg].g, colors[fg].b);	
+		SDL_SetTextureColorMod(s->font, colors[fg].r, colors[fg].g, colors[fg].b);
 		SDL_RenderCopy(s->renderer, s->font, &fr, &sr);
 		x++;
 	}
 	SDL_RenderPresent(s->renderer);
 }
 
-void screen_pollevents(Screen* s)
+void screen_pollevents(Screen* s, CPU* c)
 {
 	SDL_Event e;
 	while(SDL_PollEvent(&e)) {
 		switch(e.type) {
 			case SDL_QUIT:
 				s->closerequested = 1;
+				break;
+			case SDL_KEYUP:
+				cpu_add_key_to_buffer(c, e.key.keysym.sym);
 				break;
 		}
 	}

@@ -34,6 +34,9 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 		}else if(lines[i][0] == 0) {
 			line++;
 			continue;
+		}else if(lines[i][0] == ';') {
+			line++;
+			continue;
 		}
 
 		char* linedup = strdup(lines[i]);
@@ -195,6 +198,55 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 			data = add_byte(data, &mempos, 0x27);
 		}else if(strcmp(tok, "ADDY") == 0) {
 			data = add_byte(data, &mempos, 0x28);
+		}else if(strcmp(tok, "RET") == 0) {
+			data = add_byte(data, &mempos, 0x29);
+		}else if(strcmp(tok, "STRHD") == 0) {
+			data = add_byte(data, &mempos, 0x2A);
+		}else if(strcmp(tok, "STRLD") == 0) {
+			data = add_byte(data, &mempos, 0x2B);
+		}else if(strcmp(tok, "LDAHD") == 0) {
+			data = add_byte(data, &mempos, 0x2C);
+		}else if(strcmp(tok, "LDXHD") == 0) {
+			data = add_byte(data, &mempos, 0x2D);
+		}else if(strcmp(tok, "LDYHD") == 0) {
+			data = add_byte(data, &mempos, 0x2E);
+		}else if(strcmp(tok, "LDALD") == 0) {
+			data = add_byte(data, &mempos, 0x2F);
+		}else if(strcmp(tok, "LDXLD") == 0) {
+			data = add_byte(data, &mempos, 0x30);
+		}else if(strcmp(tok, "LDYLD") == 0) {
+			data = add_byte(data, &mempos, 0x31);
+		}else if(strcmp(tok, "INT") == 0) {
+			data = add_byte(data, &mempos, 0x32);
+			tok = strtok(NULL, " ,");
+			int num = strtol(tok, NULL, 0);
+			if(num > 255 || num < 0) {
+				printf("ERROR line %d: Value out of bounds, needed 8-bit unsigned value\n", line);
+				exit(-1);
+			}
+			data = add_byte(data, &mempos, (u8)num);
+		}else if(strcmp(tok, "JSR") == 0) {
+			data = add_byte(data, &mempos, 0x33);
+		}else if(strcmp(tok, "JSRL") == 0) {
+			tok = strtok(NULL, " ,");
+			int j;
+			Label label;
+			label.name = NULL;
+			for(j = 0; j < labels->count; j++) {
+				if(strcmp(tok, labels->labels[j].name) == 0){
+					label = labels->labels[j];
+				}
+			}
+			if(label.name == NULL) {
+				printf("ERROR line %d: Unknown label!\n", line);
+				exit(-1);
+			}
+			
+			data = add_byte(data, &mempos, 0x08);
+			data = add_byte(data, &mempos, (u8)((label.mempos & 0xFF00) >> 8));
+			data = add_byte(data, &mempos, 0x09);
+			data = add_byte(data, &mempos, (u8)(label.mempos & 0xFF));
+			data = add_byte(data, &mempos, 0x33);
 		}
 		else {
 			printf("ERROR line %d: Unknwon opcode '%s'\n", line, tok);
@@ -229,6 +281,8 @@ LabelArray* find_labels(char** lines, int linecount, int memoffset)
 
 			continue;
 		}else if(lines[i][0] == 0) {
+			continue;
+		}else if(lines[i][0] == ';') {
 			continue;
 		}
 
@@ -321,7 +375,28 @@ LabelArray* find_labels(char** lines, int linecount, int memoffset)
 			mempos++;
 		}else if(strcmp(tok, "SETD") == 0) {
 			mempos += 4;
+		}else if(strcmp(tok, "RET") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "STRHD") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "STRLD") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "LDAHD") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "LDXHD") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "LDYHD") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "LDALD") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "LDXLD") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "LDYLD") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "INT") == 0) {
+			mempos += 2;
 		}
+
 	}
 
 	return array;

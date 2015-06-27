@@ -1,0 +1,12 @@
+LDXC 0x01
+INT 0x0
+
+LDHA 0x80
+LDLA 0x00
+STRX
+INCD
+LDXC 0x07
+STRX
+
+:loop
+JMPL loop

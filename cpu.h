@@ -44,6 +44,19 @@
 #define ADDA 	0x26	// Add acc to address
 #define ADDX	0x27	// Add x to address
 #define ADDY	0x28	// Add y to address
+#define RET		0x29	// Pop address from call level stack, and jump there
+#define STRHD 	0x2A	// Store higer address at address in memory
+#define STRLD	0x2B	// Store lower address at address in memory
+#define LDAHD	0x2C	// Load acc with higer address
+#define LDXHD	0x2D	// Load x with higher address
+#define LDYHD	0x2E	// Load y with higher address
+#define LDALD	0x2F	// Load acc with lower address
+#define LDXLD	0x30	// Load x with higher address
+#define LDYLD	0x31	// Load y with higher address
+#define INT		0x32	// Trigger software interrupt with the value of next byte
+#define JSR		0x33	// Set IP to address, also push next intruction to call level stack
+
+#define KEYBOARD_BUFFER_LENGTH	32
 
 typedef uint8_t u8;
 typedef uint16_t u16;
@@ -72,5 +85,7 @@ CPU* cpu_init(u16 start_addr);
 
 // Do one full machine cycle, which may be 1 or more clock cycles long
 void cpu_cycle(CPU* c);
+
+void cpu_add_key_to_buffer(CPU* c, u8 key);
 
 #endif /* _CPU_H */

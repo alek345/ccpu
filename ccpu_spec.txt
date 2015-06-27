@@ -1,0 +1,74 @@
+ccpu spec
+--------
+
+Genral specs:
+
+Big-endian
+8-bit
+Maximum of 64k mem, more might be possible through "hardware hacks"
+
+
+Registers:
+
+5 internal registers
+
+8-bit GPRS
+A - Accumaltor
+X - GPR
+Y - GPR
+
+16-bit register
+D - Address register
+IP- Points to next instruction to excecute
+
+A, X, Y and D are directly controlled by the user
+IP is indirectly controlled through instructions
+
+RAM layout:
+
+0x0000 - 0x00FF - I/O data area
+0x0100 - 0x02FF - ROM
+0x0300 - 0x03FF - IVT
+0x0400 - 0x04FF - Stack
+0x0500 - 0x05FF - Call level stack (used by jmp and ret)
+
+0x1000 - This is where the user starts
+
+0x8000 - 0x92C0 - Video memory
+
+IVT:
+Total of 128 entries
+1 word per entry
+This word is the address where the interrupt handler is located
+
+I/O data area:
+
+0x0000 - 32 bytes - Keyboard buffer
+0x0021 -  1 byte  - Keyboard buffer index
+0x0022 -  1 byte  - Stack offset
+0x0023 -  1 byte  - Call level stack offset
+
+
+Video:
+
+80x30 text mode display
+Each character is 8x12 pixels
+
+Memory mapped from 0x8000 and out
+
+Supports 16 colors (VGA mode 3h colors):
+Black		0x0		Dark gray	0x8
+Blue		0x1		Light blue	0x9
+Green		0x2		Light green	0xA
+Cyan		0x3		Light cyan	0xB
+Red			0x4		Light red 	0xC
+Magenta		0x5		Light mag.	0xD
+Brown		0x6		Yellow		0xE
+Light gray	0x7		White		0xF
+
+Each charcter entry is two bytes long
+
+Following this format
+
+First byte ascii character
+Second byte color, high nibble is background, low nibble is foreground

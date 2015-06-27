@@ -15,7 +15,7 @@ Screen* screen_init();
 
 void screen_update(Screen* s, CPU* c);
 
-void screen_pollevents(Screen* s);
+void screen_pollevents(Screen* s, CPU* c);
 int screen_closerequested(Screen* s);
 
 #endif /* _SCREEN_H */

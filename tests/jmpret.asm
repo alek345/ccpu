@@ -1,0 +1,22 @@
+:start
+JMPL plot_a
+:ret
+HLT
+
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+
+:plot_a
+LDHA 0x80
+LDLA 0x00
+LDXC 0x41
+STRX
+INCD
+LDXC 0x07
+STRX
+RET

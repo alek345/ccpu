@@ -1,0 +1,42 @@
+SETD videooffset
+LDAC 0
+STRA
+
+:loop
+LDHA 0x00
+LDLA 0x21
+LDXM
+DECX
+LDLA 0x00
+ADDX
+LDYM
+LDAC 0
+CMPAY
+SETD loop
+JE
+
+SETD videooffset
+LDAM
+LDHA 0x80
+LDLA 0x00
+ADDA
+STRY
+INCA
+INCD
+LDXC 0x07
+STRX
+INCA
+INCD
+SETD videooffset
+STRA
+
+LDHA 0x00
+LDLA 0x21
+LDAM
+DECA
+STRA
+
+JMPL loop
+
+:videooffset
+NOP

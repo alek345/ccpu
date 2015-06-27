@@ -1,0 +1,8 @@
+OFFSET 0x0100
+
+rom_entry: 0x0100
+rom_entry_loop: 0x0123
+ivt_0h: 0x0129
+ivt_0h_hltloop: 0x0131
+ivt_0h_x1: 0x0137
+ivt_0h_x1_ret: 0x0153

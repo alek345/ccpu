@@ -1,5 +1,11 @@
 #include "cpu.h"
 
+void cpu_add_key_to_buffer(CPU* c, u8 key)
+{
+	if(c->mem[0x21] >= KEYBOARD_BUFFER_LENGTH) return;
+	c->mem[c->mem[0x21]++] = key;
+}
+
 CMP compare(u8 first, u8 second)
 {
 	CMP cmp;
@@ -160,6 +166,50 @@ void cpu_cycle(CPU* c)
 			break;
 		case ADDY:
 			c->address += c->y;
+			break;
+		case RET:
+			if(c->mem[0x0023] == 0) break;
+			u8 lb = c->mem[0x0500+(--c->mem[0x0023])];
+			u8 hb = c->mem[0x0500+(--c->mem[0x0023])];
+			c->address = (hb << 8) | lb;
+			c->ip = c->address;
+			break;
+		case STRHD:
+			c->mem[c->address] = (c->address & 0xFF00) >> 8;
+			break;
+		case STRLD:
+			c->mem[c->address] = c->address & 0xFF;
+			break;
+		case LDAHD:
+			c->acc = (c->address & 0xFF00) >> 8;
+			break;
+		case LDXHD:
+			c->x = (c->address & 0xFF00) >> 8;
+			break;
+		case LDYHD:
+			c->y = (c->address & 0xFF00) >> 8;
+			break;
+		case LDALD:
+			c->acc = c->address & 0xFF;
+			break;
+		case LDXLD:
+			c->x = c->address & 0xFF;
+			break;
+		case LDYLD:
+			c->y = c->address & 0xFF;
+			break;
+		case INT:
+			if(c->mem[0x0023] >= 255) break;
+			c->mem[0x0500+(c->mem[0x0023]++)] = ((c->ip) & 0xFF00) >> 8;
+			c->mem[0x0500+(c->mem[0x0023]++)] = ((c->ip) & 0xFF);
+			u8 n = c->mem[c->ip++];
+			c->ip = (c->mem[0x300+(n*2)] << 8) | c->mem[0x300+(n*2)+1];
+			break;
+		case JSR:
+			if(c->mem[0x0023] >= 255) break;
+			c->mem[0x0500+(c->mem[0x0023]++)] = ((c->ip) & 0xFF00) >> 8;
+			c->mem[0x0500+(c->mem[0x0023]++)] = ((c->ip) & 0xFF);
+			c->ip = c->address;
 			break;
 	}
 }

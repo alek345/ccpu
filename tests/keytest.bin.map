@@ -1,0 +1,4 @@
+OFFSET 0x1000
+
+loop: 0x1007
+videooffset: 0x103C
