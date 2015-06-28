@@ -2,8 +2,8 @@
 
 void cpu_add_key_to_buffer(CPU* c, u8 key)
 {
-	if(c->mem[0x21] >= KEYBOARD_BUFFER_LENGTH) return;
-	c->mem[c->mem[0x21]++] = key;
+	if(c->mem[KEYBOARD_BUFFER_INDEX] >= KEYBOARD_BUFFER_LENGTH) return;
+	c->mem[c->mem[KEYBOARD_BUFFER_INDEX]++] = key;
 }
 
 CMP compare(u8 first, u8 second)
@@ -169,9 +169,9 @@ void cpu_cycle(CPU* c)
 			c->address += c->y;
 			break;
 		case RET:
-			if(c->mem[0x0023] == 0) break;
-			u8 lb = c->mem[0x0500+(--c->mem[0x0023])];
-			u8 hb = c->mem[0x0500+(--c->mem[0x0023])];
+			if(c->mem[CALLSTACK_INDEX] == 0) break;
+			u8 lb = c->mem[CALLSTACK_START+(--c->mem[CALLSTACK_INDEX])];
+			u8 hb = c->mem[CALLSTACK_START+(--c->mem[CALLSTACK_INDEX])];
 			c->address = (hb << 8) | lb;
 			c->ip = c->address;
 			break;
@@ -200,16 +200,16 @@ void cpu_cycle(CPU* c)
 			c->y = c->address & 0xFF;
 			break;
 		case INT:
-			if(c->mem[0x0023] >= 255) break;
-			c->mem[0x0500+(c->mem[0x0023]++)] = ((c->ip+1) & 0xFF00) >> 8;
-			c->mem[0x0500+(c->mem[0x0023]++)] = ((c->ip+1) & 0xFF);
+			if(c->mem[CALLSTACK_INDEX] >= 255) break;
+			c->mem[CALLSTACK_START+(c->mem[CALLSTACK_INDEX]++)] = ((c->ip+1) & 0xFF00) >> 8;
+			c->mem[CALLSTACK_START+(c->mem[CALLSTACK_INDEX]++)] = ((c->ip+1) & 0xFF);
 			u8 n = c->mem[c->ip++];
-			c->ip = (c->mem[0x300+(n*2)] << 8) | c->mem[0x300+(n*2)+1];
+			c->ip = (c->mem[IVT_START+(n*2)] << 8) | c->mem[IVT_START+(n*2)+1];
 			break;
 		case JSR:
-			if(c->mem[0x0023] >= 255) break;
-			c->mem[0x0500+(c->mem[0x0023]++)] = ((c->ip) & 0xFF00) >> 8;
-			c->mem[0x0500+(c->mem[0x0023]++)] = ((c->ip) & 0xFF);
+			if(c->mem[CALLSTACK_INDEX] >= 255) break;
+			c->mem[CALLSTACK_START+(c->mem[CALLSTACK_INDEX]++)] = ((c->ip) & 0xFF00) >> 8;
+			c->mem[CALLSTACK_START+(c->mem[CALLSTACK_INDEX]++)] = ((c->ip) & 0xFF);
 			c->ip = c->address;
 			break;
 		case MUAX:
@@ -247,45 +247,45 @@ void cpu_cycle(CPU* c)
 			c->address -= (c->x << 8) | c->y;
 			break;
 		case PUSHA:
-			c->mem[0x400+c->mem[0x22]++] = c->acc;
+			c->mem[STACK_START+c->mem[STACK_INDEX]++] = c->acc;
 			break;
 		case PUSHX:
-			c->mem[0x400+c->mem[0x22]++] = c->x;
+			c->mem[STACK_START+c->mem[STACK_INDEX]++] = c->x;
 			break;
 		case PUSHY:
-			c->mem[0x400+c->mem[0x22]++] = c->y;
+			c->mem[STACK_START+c->mem[STACK_INDEX]++] = c->y;
 			break;
 		case POP:
-			c->mem[0x22]--;
+			c->mem[STACK_INDEX]--;
 			break;
 		case POPA:
-			c->acc = c->mem[0x400+(--c->mem[0x22])];
+			c->acc = c->mem[STACK_START+(--c->mem[STACK_INDEX])];
 			break;
 		case POPX:
-			c->x = c->mem[0x400+(--c->mem[0x22])];
+			c->x = c->mem[STACK_START+(--c->mem[STACK_INDEX])];
 			break;
 		case POPY:
-			c->y = c->mem[0x400+(--c->mem[0x22])];
+			c->y = c->mem[STACK_START+(--c->mem[STACK_INDEX])];
 			break;
 		case PUSHHD:
-			c->mem[0x400+c->mem[0x22]++] = (c->address & 0xFF00) >> 8;
+			c->mem[STACK_START+c->mem[STACK_INDEX]++] = (c->address & 0xFF00) >> 8;
 			break;
 		case PUSHLD:
-			c->mem[0x400+c->mem[0x22]++] = c->address & 0xFF;
+			c->mem[STACK_START+c->mem[STACK_INDEX]++] = c->address & 0xFF;
 			break;
 		case POPHD:
 			c->address &= ~0xFF00;
-			c->address |= (c->mem[0x400+(--c->mem[0x22])] << 8);
+			c->address |= (c->mem[STACK_START+(--c->mem[STACK_INDEX])] << 8);
 			break;
 		case POPLD:
 			c->address &= ~0xFF;
-			c->address |= c->mem[0x400+(--c->mem[0x22])];
+			c->address |= c->mem[STACK_START+(--c->mem[STACK_INDEX])];
 			break;
 		case PUSHM:
-			c->mem[0x400+c->mem[0x22]++] = c->mem[c->address];
+			c->mem[STACK_START+c->mem[STACK_INDEX]++] = c->mem[c->address];
 			break;
 		case POPM:
-			c->mem[c->address] = c->mem[0x400+(--c->mem[0x22])];
+			c->mem[c->address] = c->mem[STACK_START+(--c->mem[STACK_INDEX])];
 			break;
 	}
 }

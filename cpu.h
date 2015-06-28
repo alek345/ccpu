@@ -57,31 +57,43 @@
 #define LDYLD	0x31	// *Load y with higher address
 #define INT		0x32	// *Trigger software interrupt with the value of next byte
 #define JSR		0x33	// *Set IP to address, also push next intruction to call level stack
-#define MUAX	0x34	// Multiply acc with x, store result in acc
-#define MUAY	0x35	// Multiply acc with y, store result in acc
-#define DIAX	0x36	// Divide acc by x, store result in acc
-#define DIAY	0x37	// Divide acc by y, store result in acc
-#define MUAXM 	0x38 	// Multiply acc with x, store result at address in memory. This result will be stored as a word
-#define MUAYM	0x39	// Multiply acc with y, store result at address in memory. This result will be stored as a word
-#define DIAXM	0x3A 	// Divide acc by x, store result at address in memory
-#define DIAYM	0x3B	// Divide acc by y, store result at address in memory
-#define ADDXY	0x3C	// Add x:y to address
-#define SUDXY	0x3D	// Sub x:y from address
-#define PUSHA 	0x3E	// Push acc to stack
-#define PUSHX	0x3F	// Push x to stack
-#define PUSHY	0x40	// Push y to stack
-#define POP		0x41	// Pop stack
-#define POPA 	0x42 	// Pop stack into acc
-#define POPX	0x43	// Pop stack into x
-#define POPY	0x44	// Pop stack into y
-#define PUSHHD	0x45	// Push high address to stack
-#define PUSHLD	0x46	// Push low address to stack
-#define POPHD	0x47	// Pop stack into high address
-#define POPLD	0x48	// Pop stack into low address
-#define PUSHM	0x49	// Push value at address in memory to stack
-#define POPM	0x4A	// Pop stack into address in memory
+#define MUAX	0x34	// *Multiply acc with x, store result in acc
+#define MUAY	0x35	// *Multiply acc with y, store result in acc
+#define DIAX	0x36	// *Divide acc by x, store result in acc
+#define DIAY	0x37	// *Divide acc by y, store result in acc
+#define MUAXM 	0x38 	// *Multiply acc with x, store result at address in memory. This result will be stored as a word
+#define MUAYM	0x39	// *Multiply acc with y, store result at address in memory. This result will be stored as a word
+#define DIAXM	0x3A 	// *Divide acc by x, store result at address in memory
+#define DIAYM	0x3B	// *Divide acc by y, store result at address in memory
+#define ADDXY	0x3C	// *Add x:y to address
+#define SUDXY	0x3D	// *Sub x:y from address
+#define PUSHA 	0x3E	// *Push acc to stack
+#define PUSHX	0x3F	// *Push x to stack
+#define PUSHY	0x40	// *Push y to stack
+#define POP		0x41	// *Pop stack
+#define POPA 	0x42 	// *Pop stack into acc
+#define POPX	0x43	// *Pop stack into x
+#define POPY	0x44	// *Pop stack into y
+#define PUSHHD	0x45	// *Push high address to stack
+#define PUSHLD	0x46	// *Push low address to stack
+#define POPHD	0x47	// *Pop stack into high address
+#define POPLD	0x48	// *Pop stack into low address
+#define PUSHM	0x49	// *Push value at address in memory to stack
+#define POPM	0x4A	// *Pop stack into address in memory
 
 #define KEYBOARD_BUFFER_LENGTH	32
+
+#define IVT_START			0x0300
+#define STACK_START			0x0400
+#define CALLSTACK_START		0x0500
+#define VIDEO_START			0x8000
+
+#define KEYBOARD_BUFFER_INDEX	0x21
+#define STACK_INDEX				0x22
+#define CALLSTACK_INDEX			0x23
+#define SCREEN_CURSOR_X			0x24
+#define SCREEN_CURSOR_Y			0x25
+#define SCREEN_COLOR			0x26
 
 typedef uint8_t u8;
 typedef uint16_t u16;

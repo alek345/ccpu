@@ -83,8 +83,8 @@ void screen_update(Screen* s, CPU* c)
 	int y = 0;
 	int blinky = 0;
 	for(i = 0; i < 80*30; i++) {
-		u8 ch = c->mem[0x8000+(mem++)];
-		u8 col = c->mem[0x8000+(mem++)];
+		u8 ch = c->mem[VIDEO_START+(mem++)];
+		u8 col = c->mem[VIDEO_START+(mem++)];
 		if(col == 0) {
 			continue;
 		}		
@@ -114,9 +114,9 @@ void screen_update(Screen* s, CPU* c)
 		if(blinky >= 60) {
 			blinky = 0;
 		}else if(blinky >= 30) {
+			SDL_RenderFillRect(s->renderer, &(SDL_Rect){c->mem[SCREEN_CURSOR_X]*8, c->mem[SCREEN_CURSOR_Y]*12+10, 8, 2});
 			blinky++;
 		}else {
-			SDL_RenderFillRect(s->renderer, &(SDL_Rect){c->mem[0x24]*8, c->mem[0x25]*12+10, 8, 2});
 			blinky++;
 		}
 
