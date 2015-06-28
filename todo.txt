@@ -2,8 +2,4 @@ TODO list for ccpu
 
 Add ORG pseudo-op, this opcode sets the current offset used to generate labels, useful for creating offset, or pointers to memory
 
-Add some sort of stack, with push and pop instructions, remember empty pop(pop but not set data in stack to a register)
-
-Add keyboard input of somesort, maybe through a interrupt system.
-
-Write an internal rom, this rom contains information, like the BIOS data area and probably a interrupt vector table.
+Add push and pop instructions, remember empty pop(pop but not set data in stack to a register)

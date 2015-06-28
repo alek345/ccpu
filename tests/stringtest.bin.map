@@ -1,0 +1,5 @@
+OFFSET 0x1000
+
+start: 0x1000
+start_string: 0x1005
+end: 0x1012

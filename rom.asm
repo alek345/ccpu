@@ -1,5 +1,5 @@
 ; ccpu rom
-; resides at 0x100-0x1FF
+; resides at 0xF000-0xFFFF
 
 ; This is rom entry, here the IVT is setup
 :rom_entry
@@ -18,6 +18,24 @@ ADDY
 STRX
 INCY
 
+SETD ivt_1h
+LDXHD
+LDHA 0x03
+LDLA 0x00
+ADDY
+STRX
+INCY
+SETD ivt_1h
+LDXLD
+LDHA 0x03
+LDLA 0x00
+ADDY
+STRX
+INCY
+
+; Init video
+JSRL ivt_1h_init
+
 LDAC 0
 LDXC 0
 LDYX 0
@@ -31,6 +49,53 @@ JMP
 HLT
 JMPL rom_entry_loop
 
+; IVT 1h - Video
+:ivt_1h_init
+LDXC 0
+SETD ivt_1h_screenx
+STRX
+SETD ivt_1h_screeny
+STRX
+SETD ivt_1h_color
+LDXC 0x07
+STRX
+RET
+
+:ivt_1h
+LDXC 1
+CMPAX
+SETD ivt_1h_a1
+JE
+LDXC 2
+CMPAX
+SETD ivt_1h_a2
+JE
+
+RET
+:ivt_1h_hltloop
+JMPL ivt_1h_hltloop
+
+; IVT 1h - A=1 - Set x and y, X=x, Y=y
+:ivt_1h_a1
+SETD ivt_1h_screenx
+STRX
+SETD ivt_1h_screeny
+STRY
+RET
+
+; IVT 1h - A=2 - Set color, X=color
+:ivt_1h_a2
+SETD ivt_1h_color
+STRX
+RET
+
+:ivt_1h_screenx
+NOP
+:ivt_1h_screeny
+NOP
+:ivt_1h_color
+NOP
+
 ; IVT 0h - Mainly keyboard routines
 :ivt_0h
 LDAC 0x1
@@ -38,6 +103,7 @@ CMPAX
 SETD ivt_0h_x1
 JE
 
+RET
 :ivt_0h_hltloop
 HLT
 JMPL ivt_0h_hltloop

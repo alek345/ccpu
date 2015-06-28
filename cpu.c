@@ -43,6 +43,7 @@ void cpu_cycle(CPU* c)
 {
 	u8 op = c->mem[c->ip++];
 	if(op == NOP) return;
+	u16 result;
 	
 	switch(op) {
 		case HLT:
@@ -200,8 +201,8 @@ void cpu_cycle(CPU* c)
 			break;
 		case INT:
 			if(c->mem[0x0023] >= 255) break;
-			c->mem[0x0500+(c->mem[0x0023]++)] = ((c->ip) & 0xFF00) >> 8;
-			c->mem[0x0500+(c->mem[0x0023]++)] = ((c->ip) & 0xFF);
+			c->mem[0x0500+(c->mem[0x0023]++)] = ((c->ip+1) & 0xFF00) >> 8;
+			c->mem[0x0500+(c->mem[0x0023]++)] = ((c->ip+1) & 0xFF);
 			u8 n = c->mem[c->ip++];
 			c->ip = (c->mem[0x300+(n*2)] << 8) | c->mem[0x300+(n*2)+1];
 			break;
@@ -210,6 +211,81 @@ void cpu_cycle(CPU* c)
 			c->mem[0x0500+(c->mem[0x0023]++)] = ((c->ip) & 0xFF00) >> 8;
 			c->mem[0x0500+(c->mem[0x0023]++)] = ((c->ip) & 0xFF);
 			c->ip = c->address;
+			break;
+		case MUAX:
+			c->acc *= c->x;
+			break;
+		case MUAY:
+			c->acc *= c->y;
+			break;
+		case DIAX:
+			c->acc /= c->x;
+			break;
+		case DIAY:
+			c->acc /= c->y;
+			break;
+		case MUAXM:
+			result = c->acc * c->x;
+			c->mem[c->address] = (result & 0xFF00) << 8;
+			c->mem[c->address+1] = (result & 0xFF);
+			break;
+		case MUAYM:
+			result = c->acc * c->y;
+			c->mem[c->address] = (result & 0xFF00) << 8;
+			c->mem[c->address+1] = (result & 0xFF);
+			break;
+		case DIAXM:
+			c->mem[c->address] = c->acc / c->x;
+			break;
+		case DIAYM:
+			c->mem[c->address] = c->acc / c->y;
+			break;
+		case ADDXY:
+			c->address += (c->x << 8) | c->y;
+			break;
+		case SUDXY:
+			c->address -= (c->x << 8) | c->y;
+			break;
+		case PUSHA:
+			c->mem[0x400+c->mem[0x22]++] = c->acc;
+			break;
+		case PUSHX:
+			c->mem[0x400+c->mem[0x22]++] = c->x;
+			break;
+		case PUSHY:
+			c->mem[0x400+c->mem[0x22]++] = c->y;
+			break;
+		case POP:
+			c->mem[0x22]--;
+			break;
+		case POPA:
+			c->acc = c->mem[0x400+(--c->mem[0x22])];
+			break;
+		case POPX:
+			c->x = c->mem[0x400+(--c->mem[0x22])];
+			break;
+		case POPY:
+			c->y = c->mem[0x400+(--c->mem[0x22])];
+			break;
+		case PUSHHD:
+			c->mem[0x400+c->mem[0x22]++] = (c->address & 0xFF00) >> 8;
+			break;
+		case PUSHLD:
+			c->mem[0x400+c->mem[0x22]++] = c->address & 0xFF;
+			break;
+		case POPHD:
+			c->address &= ~0xFF00;
+			c->address |= (c->mem[0x400+(--c->mem[0x22])] << 8);
+			break;
+		case POPLD:
+			c->address &= ~0xFF;
+			c->address |= c->mem[0x400+(--c->mem[0x22])];
+			break;
+		case PUSHM:
+			c->mem[0x400+c->mem[0x22]++] = c->mem[c->address];
+			break;
+		case POPM:
+			c->mem[c->address] = c->mem[0x400+(--c->mem[0x22])];
 			break;
 	}
 }

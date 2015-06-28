@@ -12,7 +12,7 @@ int cpu_thread_func(void* args)
 {
 	FILE* f;	
 
-	while(1) {
+	while(cpu_running) {
 		if(stepping) {			
 			printf("IP: 0x%04X, ADDRESS: 0x%04X\n", c->ip, c->address);
 			printf("ACC: 0x%02X, X: 0x%02X, Y: 0x%02X\n", c->acc, c->x, c->y);
@@ -52,22 +52,37 @@ get_input:
 int main(int argc, char** argv)
 {
 	int i;
+	int window = 1;
+	int showhelp = 0;
+	int fps = 0;
 
 	if(argc > 2) {
 		for(i = 2; i < argc; i++) {
 			if(strcmp(argv[i], "-s") == 0) {
 				stepping = 1;
+			}else if(strcmp(argv[i], "-noscreen") == 0) {
+				window = 0;
+			}else if(strcmp(argv[i], "-h") == 0) {
+				showhelp = 1;
+			}else if(strcmp(argv[i], "-fps") == 0) {
+				fps = 1;
+			}
+			else {
+				printf("Ignoring unknown argument '%s'. Use '-h' for more information\n", argv[i]);
 			}
 		}
 	}
 
-	if(argc >= 2) {
-	}else {
-		printf("Usage: ccpu <binary> [options]\n\nOptions:\n\t-s - Stepping mode\n");
+	if(argc < 2 | showhelp) {
+		printf("Usage: ccpu <binary> [options]\n\nOptions:\n\t-s - Stepping mode\n\t-noscreen - No screen/window\n\t-fps - Output fps\n");
 		return -1;
 	}
 
 	FILE* f = fopen(argv[1], "rb");
+	if(f == NULL) {
+		printf("Failed to open '%s'\n", argv[1]);
+		return -1;
+	}
 	fseek(f, 0, SEEK_END);
 	int length = ftell(f);
 	rewind(f);
@@ -101,20 +116,22 @@ int main(int argc, char** argv)
 	fclose(f);
 
 	c = cpu_init(0x1000);
-	Screen* s = screen_init();
 
 	for(i = 0; i < length; i++) {
 		c->mem[c->ip+i] = buffer[i];
 	}
 
 	for(i = 0; i < rom_length; i++) {
-		c->mem[0x100+i] = rom_buffer[i];
+		c->mem[0xF000+i] = rom_buffer[i];
 	}
 
-	c->ip = 0x100;
+	c->ip = 0xF000;
 
-	SDL_CreateThread(cpu_thread_func, "ccpu_thread", NULL);
+	SDL_Thread* ccpu_thread = SDL_CreateThread(cpu_thread_func, "ccpu_thread", NULL);
 	
+	if(window) {
+	Screen* s = screen_init();
+
 	Uint32 now = SDL_GetTicks();
 	Uint32 lastTime = now;
 	Uint32 fpsCounterTime = now;
@@ -132,7 +149,7 @@ int main(int argc, char** argv)
 		}
 
 		if(now - fpsCounterTime > 1000) {
-			printf("fps %d\n", frames);
+			if(fps) printf("fps %d\n", frames);
 			frames = 0;
 			fpsCounterTime = now;
 		}
@@ -140,6 +157,9 @@ int main(int argc, char** argv)
 		screen_pollevents(s, c);
 		if(!cpu_running) break;
 	}
+	screen_cleanup(s);
+	}
+	SDL_DetachThread(ccpu_thread);
 	
 	return 0;
 }

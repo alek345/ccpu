@@ -1,0 +1,5 @@
+OFFSET 0x1000
+
+keyloop: 0x1011
+color: 0x1037
+offset: 0x1038

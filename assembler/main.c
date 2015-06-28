@@ -40,7 +40,7 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 		}
 
 		char* linedup = strdup(lines[i]);
-		char* tok = strtok(linedup, " ,");
+		char* tok = strtok(linedup, " ");
 		
 		if(strcmp(tok, "NOP") == 0){
 			data = add_byte(data, &mempos, 0x00);
@@ -60,7 +60,7 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 			data = add_byte(data, &mempos, 0x07);
 		}else if(strcmp(tok, "LDHA") == 0) {
 			data = add_byte(data, &mempos, 0x08);
-			tok = strtok(NULL, " ,");
+			tok = strtok(NULL, " ");
 			int num = strtol(tok, NULL, 0);
 			if(num > 255 || num < 0) {
 				printf("ERROR line %d: Value out of bounds, needed 8-bit unsigned value\n", line);
@@ -69,7 +69,7 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 			data = add_byte(data, &mempos, (u8)num);
 		}else if(strcmp(tok, "LDLA") == 0) {
 			data = add_byte(data, &mempos, 0x09);
-			tok = strtok(NULL, " ,");
+			tok = strtok(NULL, " ");
 			int num = strtol(tok, NULL, 0);
 			if(num > 255 || num < 0) {
 				printf("ERROR line %d: Value out of bounds, needed 8-bit unsigned value\n", line);
@@ -110,7 +110,7 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 			data = add_byte(data, &mempos, 0x19);
 		}else if(strcmp(tok, "LDAC") == 0) {
 			data = add_byte(data, &mempos, 0x1A);
-			tok = strtok(NULL, " ,");
+			tok = strtok(NULL, " ");
 			int num = strtol(tok, NULL, 0);
 			if(num > 255 || num < 0) {
 				printf("ERROR line %d: Value out of bounds, needed 8-bit value\n", line);
@@ -119,7 +119,7 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 			data = add_byte(data, &mempos, (u8)num);
 		}else if(strcmp(tok, "LDXC") == 0) {
 			data = add_byte(data, &mempos, 0x1B);
-			tok = strtok(NULL, " ,");
+			tok = strtok(NULL, " ");
 			int num = strtol(tok, NULL, 0);
 			if(num > 255 || num < 0) {
 				printf("ERROR line %d: Value out of bounds, needed 8-bit value\n", line);
@@ -128,7 +128,7 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 			data = add_byte(data, &mempos, (u8)num);
 		}else if(strcmp(tok, "LDYC") == 0) {
 			data = add_byte(data, &mempos, 0x1C);
-			tok = strtok(NULL, " ,");
+			tok = strtok(NULL, " ");
 			int num = strtol(tok, NULL, 0);
 			if(num > 255 || num < 0) {
 				printf("ERROR line %d: Value out of bounds, needed 8-bit value\n", line);
@@ -138,7 +138,7 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 		}else if(strcmp(tok, "JMP") == 0) {
 			data = add_byte(data, &mempos, 0x1D);
 		}else if(strcmp(tok, "JMPL") == 0) {
-			tok = strtok(NULL, " ,");
+			tok = strtok(NULL, " ");
 			int j;
 			Label label;
 			label.name = NULL;
@@ -160,7 +160,7 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 		}else if(strcmp(tok, "INCD") == 0) {
 			data = add_byte(data, &mempos, 0x1E);
 		}else if(strcmp(tok, "SETD") == 0) {
-			tok = strtok(NULL, " ,");
+			tok = strtok(NULL, " ");
 			int j;
 			Label label;
 			label.name = NULL;
@@ -218,7 +218,7 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 			data = add_byte(data, &mempos, 0x31);
 		}else if(strcmp(tok, "INT") == 0) {
 			data = add_byte(data, &mempos, 0x32);
-			tok = strtok(NULL, " ,");
+			tok = strtok(NULL, " ");
 			int num = strtol(tok, NULL, 0);
 			if(num > 255 || num < 0) {
 				printf("ERROR line %d: Value out of bounds, needed 8-bit unsigned value\n", line);
@@ -228,7 +228,7 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 		}else if(strcmp(tok, "JSR") == 0) {
 			data = add_byte(data, &mempos, 0x33);
 		}else if(strcmp(tok, "JSRL") == 0) {
-			tok = strtok(NULL, " ,");
+			tok = strtok(NULL, " ");
 			int j;
 			Label label;
 			label.name = NULL;
@@ -247,6 +247,61 @@ u8* compile(char** lines, int linecount, LabelArray* labels, int *data_len)
 			data = add_byte(data, &mempos, 0x09);
 			data = add_byte(data, &mempos, (u8)(label.mempos & 0xFF));
 			data = add_byte(data, &mempos, 0x33);
+		}else if(strcmp(tok, "ASCIZ") == 0) {
+			char* dup = strdup(lines[i]);
+			dup += strlen(tok);
+			dup++;
+			while(*dup) {
+				data = add_byte(data, &mempos, *dup);
+				dup++;
+			}
+			data = add_byte(data, &mempos, 0);
+		}else if(strcmp(tok, "MUAX") == 0) {
+			data = add_byte(data, &mempos, 0x34);
+		}else if(strcmp(tok, "MUAY") == 0) {
+			data = add_byte(data, &mempos, 0x35);
+		}else if(strcmp(tok, "DIAX") == 0) {
+			data = add_byte(data, &mempos, 0x36);
+		}else if(strcmp(tok, "DIAY") == 0) {
+			data = add_byte(data, &mempos, 0x37);
+		}else if(strcmp(tok, "MUAXM") == 0) {
+			data = add_byte(data, &mempos, 0x38);
+		}else if(strcmp(tok, "MUAYM") == 0) {
+			data = add_byte(data, &mempos, 0x39);
+		}else if(strcmp(tok, "DIAXM") == 0) {
+			data = add_byte(data, &mempos, 0x3A);
+		}else if(strcmp(tok, "DIAYM") == 0) {
+			data = add_byte(data, &mempos, 0x3B);
+		}else if(strcmp(tok, "ADDXY") == 0) {
+			data = add_byte(data, &mempos, 0x3C);
+		}else if(strcmp(tok, "SUDXY") == 0) {
+			data = add_byte(data, &mempos, 0x3D);
+		}else if(strcmp(tok, "PUSHA") == 0) {
+			data = add_byte(data, &mempos, 0x3E);
+		}else if(strcmp(tok, "PUSHX") == 0) {
+			data = add_byte(data, &mempos, 0x3F);
+		}else if(strcmp(tok, "PUSHY") == 0) {
+			data = add_byte(data, &mempos, 0x40);
+		}else if(strcmp(tok, "POP") == 0) {
+			data = add_byte(data, &mempos, 0x41);
+		}else if(strcmp(tok, "POPA") == 0) {
+			data = add_byte(data, &mempos, 0x42);
+		}else if(strcmp(tok, "POPX") == 0) {
+			data = add_byte(data, &mempos, 0x43);
+		}else if(strcmp(tok, "POPY") == 0) {
+			data = add_byte(data, &mempos, 0x44);
+		}else if(strcmp(tok, "PUSHHD") == 0) {
+			data = add_byte(data, &mempos, 0x45);
+		}else if(strcmp(tok, "PUSHLD") == 0) {
+			data = add_byte(data, &mempos, 0x46);
+		}else if(strcmp(tok, "POPHD") == 0) {
+			data = add_byte(data, &mempos, 0x47);
+		}else if(strcmp(tok, "POPLD") == 0) {
+			data = add_byte(data, &mempos, 0x48);
+		}else if(strcmp(tok, "PUSHM") == 0) {
+			data = add_byte(data, &mempos, 0x49);
+		}else if(strcmp(tok, "POPM") == 0) {
+			data = add_byte(data, &mempos, 0x4A);
 		}
 		else {
 			printf("ERROR line %d: Unknwon opcode '%s'\n", line, tok);
@@ -287,7 +342,7 @@ LabelArray* find_labels(char** lines, int linecount, int memoffset)
 		}
 
 		char* line = strdup(lines[i]);
-		char* tok = strtok(line, " ,");
+		char* tok = strtok(line, " ");
 		
 		if(strcmp(tok, "NOP") == 0){
 			mempos++;
@@ -395,6 +450,65 @@ LabelArray* find_labels(char** lines, int linecount, int memoffset)
 			mempos++;
 		}else if(strcmp(tok, "INT") == 0) {
 			mempos += 2;
+		}else if(strcmp(tok, "ASCIZ") == 0) {
+			char* dup = strdup(lines[i]);
+			dup += strlen(tok);
+			dup++;
+			while(*dup) {
+				mempos++;
+				dup++;
+			}
+			mempos++;
+		}else if(strcmp(tok, "JSR") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "JSRL") == 0) {
+			mempos += 5;
+		}else if(strcmp(tok, "MUAX") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "MUAY") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "DIAX") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "DIAY") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "MUAXM") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "MUAYM") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "DIAXM") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "DIAYM") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "ADDXY") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "SUDXY") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "PUSHA") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "PUSHX") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "PUSHY") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "POP") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "POPA") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "POPX") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "POPY") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "PUSHHD") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "PUSHLD") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "POPHD") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "POPLD") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "PUSHM") == 0) {
+			mempos++;
+		}else if(strcmp(tok, "POPM") == 0) {
+			mempos++;
 		}
 
 	}

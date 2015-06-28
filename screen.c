@@ -81,6 +81,7 @@ void screen_update(Screen* s, CPU* c)
 
 	int x = 0;
 	int y = 0;
+	int blinky = 0;
 	for(i = 0; i < 80*30; i++) {
 		u8 ch = c->mem[0x8000+(mem++)];
 		u8 col = c->mem[0x8000+(mem++)];
@@ -109,9 +110,27 @@ void screen_update(Screen* s, CPU* c)
 		u8 fg = (col & 0xF);
 		SDL_SetTextureColorMod(s->font, colors[fg].r, colors[fg].g, colors[fg].b);
 		SDL_RenderCopy(s->renderer, s->font, &fr, &sr);
+		
+		if(blinky >= 60) {
+			blinky = 0;
+		}else if(blinky >= 30) {
+			blinky++;
+		}else {
+			SDL_RenderFillRect(s->renderer, &(SDL_Rect){c->mem[0x24]*8, c->mem[0x25]*12+10, 8, 2});
+			blinky++;
+		}
+
 		x++;
 	}
 	SDL_RenderPresent(s->renderer);
+}
+
+void screen_cleanup(Screen* s)
+{
+	SDL_DestroyTexture(s->font);
+	SDL_DestroyRenderer(s->renderer);
+	SDL_DestroyWindow(s->window);
+	SDL_Quit();
 }
 
 void screen_pollevents(Screen* s, CPU* c)
