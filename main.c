@@ -56,9 +56,14 @@ int main(int argc, char** argv)
 	int window = 1;
 	int showhelp = 0;
 	int fps = 0;
+	int width = 640;
+	int height = 360;
 
 	if(argc > 2) {
 		for(i = 2; i < argc; i++) {
+			char* dup = strdup(argv[i]);
+			char* tok = strtok(dup, "=");			
+
 			if(strcmp(argv[i], "-s") == 0) {
 				stepping = 1;
 			}else if(strcmp(argv[i], "-noscreen") == 0) {
@@ -67,6 +72,12 @@ int main(int argc, char** argv)
 				showhelp = 1;
 			}else if(strcmp(argv[i], "-fps") == 0) {
 				fps = 1;
+			}else if(strcmp(tok, "-width") == 0) {
+				tok = strtok(NULL, "=");
+				width = strtol(tok, NULL, 0);
+			}else if(strcmp(tok, "-height") == 0) {
+				tok = strtok(NULL, "=");
+				height = strtol(tok, NULL, 0);
 			}
 			else {
 				printf("Ignoring unknown argument '%s'. Use '-h' for more information\n", argv[i]);
@@ -103,8 +114,8 @@ int main(int argc, char** argv)
 	}
 	fseek(f, 0, SEEK_END);
 	int rom_length = ftell(f);
-	if(rom_length > 0x100) {
-		printf("'rom.bin' is %04X bytes long, but can not be longer than 0x100 bytes\n");
+	if(rom_length > 0x1000) {
+		printf("'rom.bin' is %04X bytes long, but can not be longer than 0x100 bytes\n", rom_length);
 		return -1;
 	}
 	rewind(f);
@@ -131,7 +142,7 @@ int main(int argc, char** argv)
 	SDL_Thread* ccpu_thread = SDL_CreateThread(cpu_thread_func, "ccpu_thread", NULL);
 	
 	if(window) {
-	Screen* s = screen_init(640, 360, 640, 360, 8, 12, 16, 16);
+	Screen* s = screen_init(width, height, 640, 360, 8, 12, 16, 16);
 
 	Uint32 now = SDL_GetTicks();
 	Uint32 lastTime = now;
