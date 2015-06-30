@@ -52,16 +52,20 @@ JMPL rom_entry_loop
 ; IVT 1h - Video
 :ivt_1h_init
 LDXC 0
-SETD ivt_1h_screenx
+LDHA 0x00
+LDLA 0x24
 STRX
-SETD ivt_1h_screeny
+LDLA 0x25
 STRX
-SETD ivt_1h_color
+LDLA 0x26
 LDXC 0x07
 STRX
 RET
 
 :ivt_1h
+PUSHA
+PUSHX
+PUSHY
 LDXC 1
 CMPAX
 SETD ivt_1h_a1
@@ -77,23 +81,83 @@ JMPL ivt_1h_hltloop
 
 ; IVT 1h - A=1 - Set x and y, X=x, Y=y
 :ivt_1h_a1
-SETD ivt_1h_screenx
+POPY
+POPX
+POPA
+LDHA 0x00
+LDLA 0x24
 STRX
-SETD ivt_1h_screeny
+LDHA 0x00
+LDLA 0x25
 STRY
 RET
 
 ; IVT 1h - A=2 - Set color, X=color
 :ivt_1h_a2
-SETD ivt_1h_color
+POPY
+POPX
+POPA
+LDHA 0x00
+LDLA 0x26
 STRX
 RET
 
-:ivt_1h_screenx
+; IVT 1h - A=3 - X:Y=String ending with zero
+:ivt_1h_a3
+POPY
+POPX
+POPA
+
+PUSHX
+PUSHY
+
+:loop
+; fetch char
+SETD stringoffset
+LDAM
+LDHA 0x00
+LDLA 0x00
+POPY
+POPX
+ADDXY
+POPX
+POPY
+ADDA
+LDXM
+LDYX 0
+CMPXY
+SETD ivt_1h_a3_end
+JE
+PUSHX
+
+LDHA 0x00
+LDLA 0x24
+LDAM
+PUSHA
+LDHA 0x00
+LDLA 0x25
+LDAM
+LDXC 80
+SETD ivt_1h_a3_temp
+MUAXM
+PUSHHD
+PUSHLD
+POPY
+POPX
+LDHA 0x80
+LDLA 0x00
+ADDXY
+POPA
+ADDA
+POPX
+STRX
+
+:ivt_1h_a3_end
+RET
+:ivt_1h_a3_temp
 NOP
-:ivt_1h_screeny
 NOP
-:ivt_1h_color
+:stringoffset
 NOP
 
 ; IVT 0h - Mainly keyboard routines

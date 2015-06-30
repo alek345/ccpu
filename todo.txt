@@ -2,4 +2,12 @@ TODO list for ccpu
 
 Add ORG pseudo-op, this opcode sets the current offset used to generate labels, useful for creating offset, or pointers to memory
 
-Add push and pop instructions, remember empty pop(pop but not set data in stack to a register)
+Finish string render IVT 1h a3, tip: create a single char push, which also handles moving the cursor, then use that function to finish string rendering
+
+Implement i/o ports, design a disk controller, that handles atleast floppies.
+	io port instructions
+	OUTXY	- Output y to port address x
+	OUTAX	- Output a to port address x
+	OUTAY	- Output a to port address y
+	
+	Also maybe a serial port, this port prints by default to stdout, but one should be able reroute this via an cmd argument

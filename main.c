@@ -35,6 +35,7 @@ get_input:
 					fwrite(c->mem, sizeof(u8), 0x10000, f);
 					fclose(f);
 					goto get_input;
+					break;
 			}
 		}
 		if(c->hlt) { 
@@ -130,7 +131,7 @@ int main(int argc, char** argv)
 	SDL_Thread* ccpu_thread = SDL_CreateThread(cpu_thread_func, "ccpu_thread", NULL);
 	
 	if(window) {
-	Screen* s = screen_init();
+	Screen* s = screen_init(640, 360, 640, 360, 8, 12, 16, 16);
 
 	Uint32 now = SDL_GetTicks();
 	Uint32 lastTime = now;
@@ -158,8 +159,10 @@ int main(int argc, char** argv)
 		if(!cpu_running) break;
 	}
 	screen_cleanup(s);
-	}
 	SDL_DetachThread(ccpu_thread);
+	}else {
+		SDL_WaitThread(ccpu_thread, NULL);
+	}
 	
 	return 0;
 }

@@ -83,10 +83,10 @@
 
 #define KEYBOARD_BUFFER_LENGTH	32
 
-#define IVT_START			0x0300
-#define STACK_START			0x0400
-#define CALLSTACK_START		0x0500
-#define VIDEO_START			0x8000
+#define IVT_START				0x0300
+#define STACK_START				0x0400
+#define CALLSTACK_START			0x0500
+#define VIDEO_START				0x8000
 
 #define KEYBOARD_BUFFER_INDEX	0x21
 #define STACK_INDEX				0x22
@@ -123,6 +123,7 @@ CPU* cpu_init(u16 start_addr);
 // Do one full machine cycle, which may be 1 or more clock cycles long
 void cpu_cycle(CPU* c);
 
+// Add key to keybuffer
 void cpu_add_key_to_buffer(CPU* c, u8 key);
 
 #endif /* _CPU_H */

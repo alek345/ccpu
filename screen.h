@@ -11,7 +11,7 @@ typedef struct{
 	int closerequested;
 } Screen;
 
-Screen* screen_init();
+Screen* screen_init(int window_w, int window_h, int screen_w, int screen_h, int char_w, int char_h, int font_w, int font_h);
 
 void screen_update(Screen* s, CPU* c);
 void screen_cleanup(Screen* s);

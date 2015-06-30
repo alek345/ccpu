@@ -1,5 +1,6 @@
 LDXC 2
 LDYC 0
+LDAC 1
 INT 1
 
 LDHA 0x80

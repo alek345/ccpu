@@ -7,14 +7,27 @@ typedef struct{
 } Screen_Color;
 
 static Screen_Color colors[16];
+static int screen_w;
+static int screen_h;
+static int char_w;
+static int char_h;
+static int font_w;
+static int font_h;
 
-Screen* screen_init()
+Screen* screen_init(int win_w, int win_h, int scr_w, int scr_h, int ch_w, int ch_h, int fnt_w, int fnt_h)
 {
+	screen_w = scr_w;
+	screen_h = scr_h;
+	char_w = ch_w;
+	char_h = ch_h;
+	font_w = fnt_w;
+	font_h = fnt_h;
+
 	Screen* s = (Screen*)malloc(sizeof(Screen));
 	
 	SDL_Init(SDL_INIT_VIDEO);
 
-	s->window = SDL_CreateWindow("ccpu", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 360, SDL_WINDOW_RESIZABLE);
+	s->window = SDL_CreateWindow("ccpu", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, win_w, win_h, SDL_WINDOW_RESIZABLE);
 	if(s->window == NULL) {
 		printf("Failed to create window!\n");
 		exit(-1);
@@ -25,7 +38,7 @@ Screen* screen_init()
 		printf("Failed to create renderer!\n");
 		exit(-1);
 	}
-	SDL_RenderSetLogicalSize(s->renderer, 640, 360);
+	SDL_RenderSetLogicalSize(s->renderer, screen_w, screen_h);
 
 	SDL_Surface* img = SDL_LoadBMP("font.bmp");
 	if(img == NULL) {
@@ -68,13 +81,13 @@ void screen_update(Screen* s, CPU* c)
 	int i;
 	int mem = 0;
 	SDL_Rect fr;
-	fr.w = 8;
-	fr.h = 12;
+	fr.w = char_w;
+	fr.h = char_h;
 	SDL_Rect sr;
 	sr.x = 0;
 	sr.y = 0;
-	sr.w = 8;
-	sr.h = 12;
+	sr.w = char_w;
+	sr.h = char_h;
 	
 	SDL_SetRenderDrawColor(s->renderer, 0, 0, 0, 0);
 	SDL_RenderClear(s->renderer);	
@@ -89,8 +102,8 @@ void screen_update(Screen* s, CPU* c)
 			continue;
 		}		
 
-		u8 ch_x = (ch % 16) * 8;
-		u8 ch_y = (ch / 16) * 12;
+		u8 ch_x = (ch % font_w) * char_w;
+		u8 ch_y = (ch / font_h) * char_h;
 
 		fr.x = ch_x;
 		fr.y = ch_y;
@@ -99,8 +112,8 @@ void screen_update(Screen* s, CPU* c)
 			x = 0;
 			y++;
 		}
-		sr.x = x * 8;
-		sr.y = y * 12;
+		sr.x = x * char_w;
+		sr.y = y * char_h;
 		
 		u8 bg = (col & 0xF0) >> 4;
 		if(bg != 0) {
@@ -112,13 +125,12 @@ void screen_update(Screen* s, CPU* c)
 		SDL_RenderCopy(s->renderer, s->font, &fr, &sr);
 		
 		if(blinky >= 60) {
-			blinky = 0;
-		}else if(blinky >= 30) {
-			SDL_RenderFillRect(s->renderer, &(SDL_Rect){c->mem[SCREEN_CURSOR_X]*8, c->mem[SCREEN_CURSOR_Y]*12+10, 8, 2});
-			blinky++;
+			if(blinky >= 120) blinky = 0;
 		}else {
-			blinky++;
+			SDL_SetRenderDrawColor(s->renderer, colors[fg].r, colors[fg].g, colors[fg].b, 255);
+			SDL_RenderFillRect(s->renderer,&(SDL_Rect){c->mem[SCREEN_CURSOR_X]*char_w, c->mem[SCREEN_CURSOR_Y]*char_h+10, char_w, 2});
 		}
+		blinky++;
 
 		x++;
 	}
