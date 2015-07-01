@@ -14,7 +14,7 @@ static int char_h;
 static int font_w;
 static int font_h;
 
-Screen* screen_init(int win_w, int win_h, int scr_w, int scr_h, int ch_w, int ch_h, int fnt_w, int fnt_h)
+Screen* screen_init(int win_w, int win_h, int scr_w, int scr_h, int ch_w, int ch_h, int fnt_w, int fnt_h, int fullscreen)
 {
 	screen_w = scr_w;
 	screen_h = scr_h;
@@ -27,7 +27,8 @@ Screen* screen_init(int win_w, int win_h, int scr_w, int scr_h, int ch_w, int ch
 	
 	SDL_Init(SDL_INIT_VIDEO);
 
-	s->window = SDL_CreateWindow("ccpu", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, win_w, win_h, SDL_WINDOW_RESIZABLE);
+	s->window = SDL_CreateWindow("ccpu", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, win_w, win_h,
+		 fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP  : SDL_WINDOW_RESIZABLE);
 	if(s->window == NULL) {
 		printf("Failed to create window!\n");
 		exit(-1);
@@ -128,7 +129,7 @@ void screen_update(Screen* s, CPU* c)
 			if(blinky >= 120) blinky = 0;
 		}else {
 			SDL_SetRenderDrawColor(s->renderer, colors[fg].r, colors[fg].g, colors[fg].b, 255);
-			SDL_RenderFillRect(s->renderer,&(SDL_Rect){c->mem[SCREEN_CURSOR_X]*char_w, c->mem[SCREEN_CURSOR_Y]*char_h+10, char_w, 2});
+			SDL_RenderFillRect(s->renderer,&(SDL_Rect){c->mem[SCREEN_CURSOR_X]*char_w, c->mem[SCREEN_CURSOR_Y]*char_h+(char_h-2), char_w, 2});
 		}
 		blinky++;
 

@@ -58,6 +58,7 @@ int main(int argc, char** argv)
 	int fps = 0;
 	int width = 640;
 	int height = 360;
+	int fullscreen = 0;
 
 	if(argc > 2) {
 		for(i = 2; i < argc; i++) {
@@ -78,6 +79,8 @@ int main(int argc, char** argv)
 			}else if(strcmp(tok, "-height") == 0) {
 				tok = strtok(NULL, "=");
 				height = strtol(tok, NULL, 0);
+			}else if(strcmp(argv[i], "-f") == 0) {
+				fullscreen = 1;
 			}
 			else {
 				printf("Ignoring unknown argument '%s'. Use '-h' for more information\n", argv[i]);
@@ -86,7 +89,7 @@ int main(int argc, char** argv)
 	}
 
 	if(argc < 2 | showhelp) {
-		printf("Usage: ccpu <binary> [options]\n\nOptions:\n\t-s - Stepping mode\n\t-noscreen - No screen/window\n\t-fps - Output fps\n");
+		printf("Usage: ccpu <binary> [options]\n\nOptions:\n\t-s - Stepping mode\n\t-noscreen - No screen/window\n\t-fps - Output fps\n\t-width=w - Set window width\n\t-height=h - Set window height\n\t-f - Fullscreen mode\n");
 		return -1;
 	}
 
@@ -142,7 +145,7 @@ int main(int argc, char** argv)
 	SDL_Thread* ccpu_thread = SDL_CreateThread(cpu_thread_func, "ccpu_thread", NULL);
 	
 	if(window) {
-	Screen* s = screen_init(width, height, 640, 360, 8, 12, 16, 16);
+	Screen* s = screen_init(width, height, 640, 360, 8, 12, 16, 16, fullscreen);
 
 	Uint32 now = SDL_GetTicks();
 	Uint32 lastTime = now;
