@@ -51,6 +51,7 @@ I/O data area:
 0x0024 -  1 byte  - R/W - Screen cursor x
 0x0025 -  1 byte  - R/W - Screen cursor y
 0x0026 -  1 byte  - R/W - Screen color
+0x0027 -  1 byte  - R/W - Cursor blink interval, 60 being, 1 second on, 1 second off. 0=cursor off, 1=no blinking
 
 Video:
 

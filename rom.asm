@@ -60,6 +60,9 @@ STRX
 LDLA 0x26
 LDXC 0x07
 STRX
+LDLA 0x27
+LDXC 1
+STRX
 RET
 
 :ivt_1h
@@ -192,6 +195,14 @@ NOP
 POPY
 POPX
 POPA
+LDLA 0x00
+LDHA 0x25
+LDXM
+LDYC 29
+CMPXY
+SETD ivt_1h_a5_linemax
+JE
+
 LDHA 0x00
 LDLA 0x24
 LDXM
@@ -217,6 +228,21 @@ LDYM
 LDLA 0x24
 LDXM
 INCX
+JMPL ivt_1h_a5_set
+
+:ivt_1h_a5_linemax
+LDHA 0x00
+LDLA 0x24
+LDYM
+LDXC 79
+CMPXY
+SETD ivt_1h_a5_widthmax
+JE
+JMPL ivt_1h_a5_set
+
+:ivt_1h_a5_widthmax
+LDYC 29
+LDXC 0
 
 :ivt_1h_a5_set
 LDAC 1

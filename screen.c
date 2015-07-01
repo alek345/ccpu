@@ -77,6 +77,7 @@ Screen* screen_init(int win_w, int win_h, int scr_w, int scr_h, int ch_w, int ch
 	return s;
 }
 
+static int blinky = 0;
 void screen_update(Screen* s, CPU* c)
 {
 	int i;
@@ -95,7 +96,6 @@ void screen_update(Screen* s, CPU* c)
 
 	int x = 0;
 	int y = 0;
-	int blinky = 0;
 	for(i = 0; i < 80*30; i++) {
 		u8 ch = c->mem[VIDEO_START+(mem++)];
 		u8 col = c->mem[VIDEO_START+(mem++)];
@@ -126,21 +126,28 @@ void screen_update(Screen* s, CPU* c)
 		SDL_SetTextureColorMod(s->font, colors[fg].r, colors[fg].g, colors[fg].b);
 		SDL_RenderCopy(s->renderer, s->font, &fr, &sr);
 
-		// TODO: Move this outside the loop, and get its color		
-		if(blinky >= 60) {
-			if(blinky >= 120) blinky = 0;
-		}else {
-			SDL_SetRenderDrawColor(s->renderer, colors[fg].r, colors[fg].g, colors[fg].b, 255);
-			SDL_RenderFillRect(s->renderer,&(SDL_Rect){c->mem[SCREEN_CURSOR_X]*char_w, c->mem[SCREEN_CURSOR_Y]*char_h+(char_h-2), char_w, 2});
-		}
-		blinky++;
-
 		x++;
 		if(x >= 80) {
 			x = 0;
 			y++;
 		}
 	}
+	
+	u8 fg = c->mem[SCREEN_COLOR] & 0x0F;
+	if(c->mem[SCREEN_BLINK_INTERVAL] == 0){
+		
+	}else if(c->mem[SCREEN_BLINK_INTERVAL] == 1) {
+		SDL_SetRenderDrawColor(s->renderer, colors[fg].r, colors[fg].g, colors[fg].b, 255);
+		SDL_RenderFillRect(s->renderer,&(SDL_Rect){c->mem[SCREEN_CURSOR_X]*char_w, c->mem[SCREEN_CURSOR_Y]*char_h+(char_h-2), char_w, 2});
+	}else if(blinky >= c->mem[SCREEN_BLINK_INTERVAL]) {
+		blinky++;
+		if(blinky >= c->mem[SCREEN_BLINK_INTERVAL]*2) blinky = 0;
+	}else {
+		SDL_SetRenderDrawColor(s->renderer, colors[fg].r, colors[fg].g, colors[fg].b, 255);
+		SDL_RenderFillRect(s->renderer,&(SDL_Rect){c->mem[SCREEN_CURSOR_X]*char_w, c->mem[SCREEN_CURSOR_Y]*char_h+(char_h-2), char_w, 2});
+		blinky++;
+	}
+
 	SDL_RenderPresent(s->renderer);
 }
 

@@ -94,6 +94,7 @@
 #define SCREEN_CURSOR_X			0x24
 #define SCREEN_CURSOR_Y			0x25
 #define SCREEN_COLOR			0x26
+#define SCREEN_BLINK_INTERVAL	0x27
 
 typedef uint8_t u8;
 typedef uint16_t u16;
