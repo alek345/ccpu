@@ -226,12 +226,12 @@ void cpu_cycle(CPU* c)
 			break;
 		case MUAXM:
 			result = c->acc * c->x;
-			c->mem[c->address] = (result & 0xFF00) << 8;
+			c->mem[c->address] = (result & 0xFF00) >> 8;
 			c->mem[c->address+1] = (result & 0xFF);
 			break;
 		case MUAYM:
 			result = c->acc * c->y;
-			c->mem[c->address] = (result & 0xFF00) << 8;
+			c->mem[c->address] = (result & 0xFF00) >> 8;
 			c->mem[c->address+1] = (result & 0xFF);
 			break;
 		case DIAXM:

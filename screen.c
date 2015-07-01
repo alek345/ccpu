@@ -100,6 +100,11 @@ void screen_update(Screen* s, CPU* c)
 		u8 ch = c->mem[VIDEO_START+(mem++)];
 		u8 col = c->mem[VIDEO_START+(mem++)];
 		if(col == 0) {
+			x++;
+			if(x >= 80) {
+				x = 0;
+				y++;
+			}
 			continue;
 		}		
 
@@ -109,10 +114,6 @@ void screen_update(Screen* s, CPU* c)
 		fr.x = ch_x;
 		fr.y = ch_y;
 		
-		if(x >= 80) {
-			x = 0;
-			y++;
-		}
 		sr.x = x * char_w;
 		sr.y = y * char_h;
 		
@@ -124,7 +125,8 @@ void screen_update(Screen* s, CPU* c)
 		u8 fg = (col & 0xF);
 		SDL_SetTextureColorMod(s->font, colors[fg].r, colors[fg].g, colors[fg].b);
 		SDL_RenderCopy(s->renderer, s->font, &fr, &sr);
-		
+
+		// TODO: Move this outside the loop, and get its color		
 		if(blinky >= 60) {
 			if(blinky >= 120) blinky = 0;
 		}else {
@@ -134,6 +136,10 @@ void screen_update(Screen* s, CPU* c)
 		blinky++;
 
 		x++;
+		if(x >= 80) {
+			x = 0;
+			y++;
+		}
 	}
 	SDL_RenderPresent(s->renderer);
 }

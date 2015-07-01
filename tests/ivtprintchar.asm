@@ -1,0 +1,15 @@
+LDAC 1
+LDXC 40
+LDYC 15
+INT 1
+
+LDAC 2
+LDXC 0x03
+INT 1
+
+:loop
+LDAC 0x03
+LDXC 0x41
+INT 1
+
+JMPL loop

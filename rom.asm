@@ -74,6 +74,18 @@ LDXC 2
 CMPAX
 SETD ivt_1h_a2
 JE
+LDXC 3
+CMPAX
+SETD ivt_1h_a3
+JE
+LDXC 4
+CMPAX
+SETD ivt_1h_a4
+JE
+LDXC 5
+CMPAX
+SETD ivt_1h_a5
+JE
 
 RET
 :ivt_1h_hltloop
@@ -102,8 +114,70 @@ LDLA 0x26
 STRX
 RET
 
-; IVT 1h - A=3 - X:Y=String ending with zero
+; IVT 1h - A=3 - Print char at X, advance cursor
 :ivt_1h_a3
+; pop register saved in interrupt caller
+POPY
+POPX
+POPA
+; save char in X for later use, pop into y because this is accessed before the color
+PUSHX
+POPY
+
+; get and push current color aswell
+LDHA 0x00
+LDLA 0x26
+LDXM
+PUSHX
+
+; saves the char
+PUSHY
+
+LDHA 0x00
+LDLA 0x25
+LDAM
+LDXC 2
+MUAX
+
+LDXC 80
+SETD ivt_1h_a3_result
+MUAXM
+
+LDHA 0x00
+LDLA 0x24
+LDAM
+LDXC 2
+MUAX
+
+SETD ivt_1h_a3_result
+LDXM
+INCD
+LDYM
+
+LDHA 0x80
+LDLA 0x00
+ADDXY
+ADDA
+
+POPX
+STRX
+INCD
+POPX
+STRX
+
+; advance cursor
+PUSHA
+PUSHX
+PUSHY
+JSRL ivt_1h_a5
+
+RET
+:ivt_1h_a3_result
+NOP
+NOP
+
+; IVT 1h - A=4 - X:Y=String ending with zero
+:ivt_1h_a4
 POPY
 POPX
 POPA
@@ -126,7 +200,7 @@ ADDA
 LDXM
 LDYX 0
 CMPXY
-SETD ivt_1h_a3_end
+SETD ivt_1h_a4_end
 JE
 PUSHX
 
@@ -138,7 +212,7 @@ LDHA 0x00
 LDLA 0x25
 LDAM
 LDXC 80
-SETD ivt_1h_a3_temp
+SETD ivt_1h_a4_temp
 MUAXM
 PUSHHD
 PUSHLD
@@ -152,13 +226,53 @@ ADDA
 POPX
 STRX
 
-:ivt_1h_a3_end
+:ivt_1h_a4_end
 RET
-:ivt_1h_a3_temp
+:ivt_1h_a4_temp
 NOP
 NOP
 :stringoffset
 NOP
+
+; IVT 1h - A=5 - Advance cursor by one
+:ivt_1h_a5
+POPY
+POPX
+POPA
+LDHA 0x00
+LDLA 0x24
+LDXM
+LDYC 79
+CMPXY
+SETD ivt_1h_a5_incy
+JE
+
+JMPL ivt_1h_a5_noincy
+
+:ivt_1h_a5_incy
+LDHA 0x00
+LDLA 0x25
+LDYM
+INCY
+LDXC 0
+JMPL ivt_1h_a5_set
+
+:ivt_1h_a5_noincy
+LDHA 0x00
+LDLA 0x25
+LDYM
+LDLA 0x24
+LDXM
+INCX
+
+:ivt_1h_a5_set
+LDAC 1
+PUSHA
+PUSHX
+PUSHY
+JSRL ivt_1h_a1
+
+RET
 
 ; IVT 0h - Mainly keyboard routines
 :ivt_0h

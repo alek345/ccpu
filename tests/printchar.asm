@@ -1,0 +1,6 @@
+LDAC 3
+LDXC 0x35
+INT 1
+
+:hlt
+JMPL hlt

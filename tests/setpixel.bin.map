@@ -1,0 +1,4 @@
+OFFSET 0x1000
+
+hlt: 0x101F
+result: 0x1024
